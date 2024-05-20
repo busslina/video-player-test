@@ -24,6 +24,31 @@ class MainApp extends StatelessWidget {
 class _Home extends RearchConsumer {
   const _Home();
 
+  @override
+  Widget build(BuildContext context, WidgetHandle use) {
+    final showingVideo = use.data(false);
+
+    return Column(
+      children: [
+        Flexible(
+          flex: 1,
+          child: ElevatedButton(
+              onPressed: () => showingVideo.value = !showingVideo.value,
+              child: Text(showingVideo.value ? 'Hide video' : 'Show video')),
+        ),
+        if (showingVideo.value)
+          const Expanded(
+            flex: 9,
+            child: _VideoPlayerWidget(),
+          ),
+      ],
+    );
+  }
+}
+
+class _VideoPlayerWidget extends RearchConsumer {
+  const _VideoPlayerWidget();
+
   static const _sampleVideoUrl = 'https://busslina.com/public/sample-30s.mp4';
 
   @override
@@ -38,6 +63,8 @@ class _Home extends RearchConsumer {
         use.callonce(() => CustomVideoPlayerWebController(
                 webVideoPlayerSettings: const CustomVideoPlayerWebSettings(
               src: _sampleVideoUrl,
+              autoplay: false,
+              hideDownloadButton: true,
             )));
 
     final initCancelableOperation = use.callonce(() =>
@@ -47,9 +74,7 @@ class _Home extends RearchConsumer {
     // Cancelling init operation on dispose
     use.effect(
       () {
-        return () {
-          initCancelableOperation.cancel();
-        };
+        return () => initCancelableOperation.cancel();
       },
       [],
     );
